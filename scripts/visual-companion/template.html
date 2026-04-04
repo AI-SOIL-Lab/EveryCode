@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Coding Agent Preview - 方案对比</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f0f0f;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 12px 16px;
+            }
+            .header h1 {
+                font-size: 14px;
+            }
+            .status {
+                display: none;
+            }
+            .nav-bar {
+                padding: 0 16px;
+                overflow-x: auto;
+            }
+            .nav-btn {
+                padding: 12px 20px;
+                font-size: 13px;
+                white-space: nowrap;
+            }
+            .content-area {
+                padding: 12px;
+            }
+            .toggle-btn {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+            .toggle-btn svg {
+                width: 14px;
+                height: 14px;
+            }
+        }
+
+        .header {
+            background: #1a1a1a;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #2d2d2d;
+        }
+
+        .header h1 {
+            color: #fff;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #888;
+            font-size: 12px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4ade80;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .orientation-toggle {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .toggle-btn {
+            background: #2d2d2d;
+            border: 1px solid #3d3d3d;
+            color: #888;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .toggle-btn:hover {
+            background: #3d3d3d;
+            color: #fff;
+        }
+
+        .toggle-btn.active {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: #fff;
+        }
+
+        .toggle-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .nav-bar {
+            background: #1a1a1a;
+            padding: 0 24px;
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid #2d2d2d;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: none;
+            color: #888;
+            padding: 16px 32px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-btn:hover {
+            color: #fff;
+            background: #252525;
+        }
+
+        .nav-btn.active {
+            color: #fff;
+            border-bottom-color: #3b82f6;
+        }
+
+        .nav-btn[data-option="A"].active {
+            border-bottom-color: #3b82f6;
+        }
+
+        .nav-btn[data-option="B"].active {
+            border-bottom-color: #f59e0b;
+        }
+
+        .nav-btn[data-option="C"].active {
+            border-bottom-color: #ef4444;
+        }
+
+        .option-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .nav-btn[data-option="A"] .option-icon {
+            background: #3b82f6;
+        }
+
+        .nav-btn[data-option="B"] .option-icon {
+            background: #f59e0b;
+        }
+
+        .nav-btn[data-option="C"] .option-icon {
+            background: #ef4444;
+        }
+
+        .content-area {
+            flex: 1;
+            padding: 24px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preview-container {
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid #2d2d2d;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .preview-container.portrait {
+            max-width: 430px;
+            max-height: 932px;
+            width: 100%;
+            height: 100%;
+        }
+
+        .preview-container.landscape {
+            max-width: none;
+            max-height: none;
+            width: 100%;
+            height: 100%;
+        }
+
+        .preview-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: none;
+        }
+
+        .preview-frame.active {
+            display: block;
+        }
+
+        /* 等待样式添加的提示样式 */
+        .waiting-style {
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #fafafa;
+            color: #666;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .waiting-style.active {
+            display: flex;
+        }
+
+        .waiting-style-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin-bottom: 24px;
+            animation: pulse-icon 2s infinite;
+        }
+
+        @keyframes pulse-icon {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+
+        .waiting-style h3 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 12px;
+        }
+
+        .waiting-style p {
+            font-size: 14px;
+            color: #6b7280;
+            line-height: 1.6;
+            max-width: 400px;
+        }
+
+        .waiting-style .path {
+            display: inline-block;
+            background: #e5e7eb;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 12px;
+            color: #4b5563;
+            margin-top: 16px;
+        }
+
+        .refreshing {
+            animation: flash 0.5s;
+        }
+
+        @keyframes flash {
+            0%, 100% { border-color: #2d2d2d; }
+            50% { border-color: #4ade80; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎨 前端方案预览</h1>
+        <div style="display: flex; align-items: center; gap: 24px;">
+            <div class="orientation-toggle">
+                <button class="toggle-btn active" id="landscapeBtn" onclick="setOrientation('landscape')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="7" width="20" height="10" rx="2"/>
+                    </svg>
+                    横屏
+                </button>
+                <button class="toggle-btn" id="portraitBtn" onclick="setOrientation('portrait')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="7" y="2" width="10" height="20" rx="2"/>
+                    </svg>
+                    竖屏
+                </button>
+            </div>
+            <div class="status">
+                <span class="status-dot"></span>
+                <span>实时预览中</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-bar">
+        <button class="nav-btn active" data-option="A" onclick="switchOption('A')">
+            <span class="option-icon">A</span>
+            方案 A
+        </button>
+        <button class="nav-btn" data-option="B" onclick="switchOption('B')">
+            <span class="option-icon">B</span>
+            方案 B
+        </button>
+        <button class="nav-btn" data-option="C" onclick="switchOption('C')">
+            <span class="option-icon">C</span>
+            方案 C
+        </button>
+    </div>
+
+    <div class="content-area">
+        <div class="preview-container" id="previewContainer">
+            <!-- 方案 A -->
+            <iframe class="preview-frame active" id="frameA" src="/options/A/index.html" sandbox="allow-scripts allow-same-origin"></iframe>
+            <div class="waiting-style" id="waitingA">
+                <div class="waiting-style-icon">⏳</div>
+                <h3>等待样式添加</h3>
+            </div>
+
+            <!-- 方案 B -->
+            <iframe class="preview-frame" id="frameB" src="/options/B/index.html" sandbox="allow-scripts allow-same-origin"></iframe>
+            <div class="waiting-style" id="waitingB">
+                <div class="waiting-style-icon">⏳</div>
+                <h3>等待样式添加</h3>
+            </div>
+
+            <!-- 方案 C -->
+            <iframe class="preview-frame" id="frameC" src="/options/C/index.html" sandbox="allow-scripts allow-same-origin"></iframe>
+            <div class="waiting-style" id="waitingC">
+                <div class="waiting-style-icon">⏳</div>
+                <h3>等待样式添加</h3>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 检查文件是否存在（通过判断 iframe 内容）
+        function checkFileExists(iframe, option) {
+            try {
+                // 尝试访问 iframe 内容，如果 404 会抛出跨域错误或内容为空
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+                const bodyContent = iframeDoc?.body?.innerText || '';
+                const title = iframeDoc?.title || '';
+
+                // 检测是否是 404 页面（Express 默认返回的 Cannot GET 或类似内容）
+                const isErrorPage = bodyContent.includes('Cannot GET') ||
+                                   bodyContent.includes('404') ||
+                                   bodyContent.includes('Error') ||
+                                   title.includes('Error') ||
+                                   !bodyContent.trim();
+
+                if (isErrorPage) {
+                    showWaitingStyle(option);
+                } else {
+                    hideWaitingStyle(option);
+                }
+            } catch (e) {
+                // 跨域错误或其他错误，假设文件存在（同源策略限制无法检测）
+                hideWaitingStyle(option);
+            }
+        }
+
+        // 显示等待样式添加提示
+        function showWaitingStyle(option) {
+            document.getElementById(`frame${option}`).classList.remove('active');
+            document.getElementById(`waiting${option}`).classList.add('active');
+        }
+
+        // 隐藏等待样式添加提示，显示 iframe
+        function hideWaitingStyle(option) {
+            document.getElementById(`waiting${option}`).classList.remove('active');
+            const frame = document.getElementById(`frame${option}`);
+            const btn = document.querySelector(`.nav-btn[data-option="${option}"]`);
+            if (btn.classList.contains('active')) {
+                frame.classList.add('active');
+            }
+        }
+
+        function switchOption(option) {
+            // 更新导航按钮状态
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.nav-btn[data-option="${option}"]`).classList.add('active');
+
+            // 切换显示：如果等待提示激活则显示提示，否则显示 iframe
+            document.querySelectorAll('.preview-frame').forEach(frame => {
+                frame.classList.remove('active');
+            });
+            document.querySelectorAll('.waiting-style').forEach(el => {
+                el.classList.remove('active');
+            });
+
+            const waitingEl = document.getElementById(`waiting${option}`);
+            const frameEl = document.getElementById(`frame${option}`);
+
+            // 检查是否需要显示等待提示
+            if (waitingEl.dataset.fileExists === 'false' ||
+                (!waitingEl.classList.contains('hidden') && !frameEl.classList.contains('loaded'))) {
+                // 先检查一次
+                checkFileExists(frameEl, option);
+            }
+
+            // 根据当前状态显示
+            if (waitingEl.classList.contains('active')) {
+                // 保持等待提示显示
+            } else {
+                frameEl.classList.add('active');
+            }
+        }
+
+        // 页面加载后检查所有 iframe
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                checkFileExists(document.getElementById('frameA'), 'A');
+                checkFileExists(document.getElementById('frameB'), 'B');
+                checkFileExists(document.getElementById('frameC'), 'C');
+            }, 100);
+        });
+
+        const ws = new WebSocket(`ws://${window.location.host}`);
+
+        ws.onopen = () => {
+            console.log('WebSocket 已连接');
+        };
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.type === 'refresh') {
+                const option = data.option;
+                const iframe = document.getElementById(`frame${option}`);
+                const container = document.getElementById('previewContainer');
+                const waitingEl = document.getElementById(`waiting${option}`);
+
+                // 重新加载 iframe
+                iframe.src = iframe.src;
+
+                // 刷新后重新检查文件是否存在
+                setTimeout(() => {
+                    checkFileExists(iframe, option);
+                }, 300);
+
+                container.classList.add('refreshing');
+                setTimeout(() => container.classList.remove('refreshing'), 500);
+                console.log(`刷新选项 ${option}`);
+            }
+        };
+
+        ws.onclose = () => {
+            console.log('WebSocket 已断开');
+        };
+
+        function setOrientation(mode) {
+            const container = document.getElementById('previewContainer');
+            const landscapeBtn = document.getElementById('landscapeBtn');
+            const portraitBtn = document.getElementById('portraitBtn');
+            
+            if (mode === 'landscape') {
+                container.classList.remove('portrait');
+                container.classList.add('landscape');
+                landscapeBtn.classList.add('active');
+                portraitBtn.classList.remove('active');
+            } else {
+                container.classList.remove('landscape');
+                container.classList.add('portrait');
+                portraitBtn.classList.add('active');
+                landscapeBtn.classList.remove('active');
+            }
+            
+            localStorage.setItem('previewOrientation', mode);
+        }
+
+        const savedOrientation = localStorage.getItem('previewOrientation') || 'landscape';
+        setOrientation(savedOrientation);
+    </script>
+</body>
+</html>

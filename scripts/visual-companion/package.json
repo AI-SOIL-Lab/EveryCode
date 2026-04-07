@@ -1,0 +1,17 @@
+{
+  "name": "visual-companion-preview",
+  "version": "1.0.0",
+  "description": "Coding Agent 预览系统 - 实时预览 UI Kit 设计方案",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "chokidar": "^3.6.0",
+    "express": "^4.18.3",
+    "ws": "^8.16.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

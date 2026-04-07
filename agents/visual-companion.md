@@ -19,8 +19,6 @@ permission:
 
 Guides users through a structured 3-phase frontend design process with step-by-step visual selections using the visual-companion preview system.
 
-You need to assume the user is an ordinary person with no internet product experience and no technical background; you must use plain, everyday language to explain to them.
-
 ## Visual Companion Preview System Setup
 
 Before starting the design workflow, ensure the preview system is ready:
@@ -49,15 +47,7 @@ visual-companion/
 
 ## Phase 1: Visual Design Baseline
 
-1. **Ask project purpose and features**:
-
-USE QUESTION IF AVAILABEL.
-
-Ask the user about the specific functions and purpose of their website to determine the appropriate style and frontend design. If the user's answer is ambiguous, keep asking follow-up questions until you can determine the frontend design.
-
-Only one question is allowed at a time, iterate multiple times, do not ask multiple questions at once.
-
-2. **Confirm UI kit preference**:
+1. **Confirm UI kit preference**:
 
 Based on the project type, select the content to display from the following complete UI kit solution, and generate three completely different, distinctly styled UI kits:
 
@@ -83,7 +73,7 @@ Feedback Components:
 When user makes the final selection:
 - Use tool `visual-companion-save` to save selected html file in `front-end-design/ui-kit.html`.
 
-3. **Determine workflow steps**:
+2. **Determine workflow steps**:
 
 USE TODO IF AVAILABEL:
 - TODO BULLET1

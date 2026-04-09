@@ -375,28 +375,22 @@
     </div>
 
     <script>
-        // 检查文件是否存在（通过判断 iframe 内容）
-        function checkFileExists(iframe, option) {
+        // 检查文件是否存在
+        async function checkFileExists(iframe, option) {
             try {
-                // 尝试访问 iframe 内容，如果 404 会抛出跨域错误或内容为空
-                const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-                const bodyContent = iframeDoc?.body?.innerText || '';
-                const title = iframeDoc?.title || '';
-
-                // 检测是否是 404 页面（Express 默认返回的 Cannot GET 或类似内容）
-                const isErrorPage = bodyContent.includes('Cannot GET') ||
-                                   bodyContent.includes('404') ||
-                                   bodyContent.includes('Error') ||
-                                   title.includes('Error') ||
-                                   !bodyContent.trim();
-
-                if (isErrorPage) {
+                // 使用 fetch 检查文件是否存在
+                const response = await fetch(`/options/${option}/index.html`, { method: 'HEAD' });
+                
+                if (!response.ok) {
+                    // 文件不存在，显示等待提示
                     showWaitingStyle(option);
                 } else {
+                    // 文件存在，隐藏等待提示
                     hideWaitingStyle(option);
                 }
             } catch (e) {
-                // 跨域错误或其他错误，假设文件存在（同源策略限制无法检测）
+                // 网络错误，假设文件存在
+                console.warn(`检查文件 ${option} 时出错:`, e);
                 hideWaitingStyle(option);
             }
         }
@@ -417,7 +411,7 @@
             }
         }
 
-        function switchOption(option) {
+        async function switchOption(option) {
             // 更新导航按钮状态
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('active');
@@ -439,7 +433,7 @@
             if (waitingEl.dataset.fileExists === 'false' ||
                 (!waitingEl.classList.contains('hidden') && !frameEl.classList.contains('loaded'))) {
                 // 先检查一次
-                checkFileExists(frameEl, option);
+                await checkFileExists(frameEl, option);
             }
 
             // 根据当前状态显示
@@ -451,11 +445,11 @@
         }
 
         // 页面加载后检查所有 iframe
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                checkFileExists(document.getElementById('frameA'), 'A');
-                checkFileExists(document.getElementById('frameB'), 'B');
-                checkFileExists(document.getElementById('frameC'), 'C');
+        window.addEventListener('load', async () => {
+            setTimeout(async () => {
+                await checkFileExists(document.getElementById('frameA'), 'A');
+                await checkFileExists(document.getElementById('frameB'), 'B');
+                await checkFileExists(document.getElementById('frameC'), 'C');
             }, 100);
         });
 
@@ -465,7 +459,7 @@
             console.log('WebSocket 已连接');
         };
 
-        ws.onmessage = (event) => {
+        ws.onmessage = async (event) => {
             const data = JSON.parse(event.data);
             if (data.type === 'refresh') {
                 const option = data.option;
@@ -477,8 +471,8 @@
                 iframe.src = iframe.src;
 
                 // 刷新后重新检查文件是否存在
-                setTimeout(() => {
-                    checkFileExists(iframe, option);
+                setTimeout(async () => {
+                    await checkFileExists(iframe, option);
                 }, 300);
 
                 container.classList.add('refreshing');

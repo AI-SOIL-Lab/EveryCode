@@ -29,6 +29,13 @@ fi
 
 echo -e "${GREEN}✓ Node.js 版本: $(node -v)${NC}"
 
+SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
+
+# 2. 切换到该目录
+cd "$SCRIPT_DIR" || exit 1
+
+echo "当前工作目录已切换为: $(pwd)"
+
 # Install dependencies
 echo ""
 echo -e "${BLUE}正在安装依赖...${NC}"

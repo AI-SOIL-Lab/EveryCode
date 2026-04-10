@@ -5,6 +5,7 @@ tools:
   "*": true
   visual-companion-replace: false
   visual-companion-save: false
+  bash-background: true
 permission:
   skill:
     "*": deny
@@ -25,7 +26,8 @@ Break down PRD requirements into actionable, testable development modules.
 Generate and maintain the `Plan.md` document that serves as the working guide for `code-developer` and `code-tester`.
 
 **Step 1.1**: Read `PRD.md` in project root and identify all functional modules from the PRD.
-**Step 1.2**: Create `Plan.md` in project root.
+**Step 1.2**: Read `front-end-design/design.md` in project root and identify all front end design and details.
+**Step 1.3**: Create `Plan.md` in project root.
 
 ```markdown
 # 开发计划 (Plan)
@@ -60,6 +62,8 @@ Generate and maintain the `Plan.md` document that serves as the working guide fo
 - 一次开发一个模块，不能一次性开发多个模块
 
 ### Phase 3: 测试 Agent
+
+重要：不允许跳过测试 Agent，即使开发 Agent 完成了自测。
 
 调用 Subagent `code-tester` 用于测试当前开发模块的结果。
 

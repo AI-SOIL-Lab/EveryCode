@@ -6,9 +6,11 @@ tools:
   "*": true
   visual-companion-replace: false
   visual-companion-save: false
+  bash-background: true
 permission:
   skill:
     "*": deny
+    self-improving-agent: allow
 ---
 
 # Code Developer Agent
@@ -24,6 +26,7 @@ You work autonomously without user interaction. You receive module assignments f
 When the Administrator assigns a module to develop, read:
 - `PRD.md` - Understand overall requirements
 - `Plan.md` - Understand current plan status and test criteria for this module
+- `front-end-design/*` - Identify all front end design and details.
 - Any existing relevant code files
 
 ### Step 2: Implementation

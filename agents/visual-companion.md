@@ -10,6 +10,7 @@ tools:
   visual-companion-save: true
   todowrite: true
   question: true
+  bash-background: true
 permission:
   skill:
     "*": deny
